@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -12,33 +11,6 @@ import (
 	"github.com/stianeikeland/go-rpio/v4"
 	"golang.org/x/sys/unix"
 )
-
-func fanTemp() (float64, error) {
-	temp, err := os.Open("/sys/devices/virtual/thermal/thermal_zone0/temp")
-	if err != nil {
-		slog.Error("Unable to open temperature file.",
-			slog.String("error", err.Error()),
-		)
-		return 0.0, err
-	}
-	defer temp.Close()
-	scanner := bufio.NewScanner(temp)
-	if !scanner.Scan() {
-		slog.Error("Unable to read temperature from file.",
-			slog.String("error", err.Error()),
-		)
-		return 0.0, scanner.Err()
-	}
-	result, err := strconv.Atoi(scanner.Text())
-	if err != nil {
-		slog.Error("Cannot convert temperature.",
-			slog.String("input", scanner.Text()),
-			slog.String("error", err.Error()),
-		)
-		return 0.0, err
-	}
-	return float64(result) / 1000.0, nil
-}
 
 func main() {
 	config, err := loadConfig()
@@ -131,7 +103,7 @@ func main() {
 }
 
 func checkTemperature(fanPin *rpio.Pin, maxTemp, targetTemp float64) {
-	temp, err := fanTemp()
+	temp, err := readTemp()
 	if err != nil {
 		sdnotify.Status("cannot probe")
 		return
