@@ -33,6 +33,7 @@ func main() {
 		slog.Error("Cannot open I/O pin.",
 			slog.String("error", err.Error()),
 		)
+		sdnotify.Errno(int(unix.EINVAL))
 		return
 	}
 	defer rpio.Close()
