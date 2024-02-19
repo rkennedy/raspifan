@@ -22,22 +22,10 @@ func main() {
 		return
 	}
 
-	var watchdog <-chan time.Time
-	if watchdogFreq, ok := os.LookupEnv("WATCHDOG_USEC"); ok {
-		freq, err := strconv.Atoi(watchdogFreq)
-		if err != nil {
-			slog.Error("Invalid WATCHDOG_USEC.",
-				slog.String("value", watchdogFreq),
-				slog.String("error", err.Error()),
-			)
-			sdnotify.Errno(int(unix.EINVAL))
-			return
-		}
-		freqD := time.Duration(freq) * time.Microsecond / 2
-		slog.Info("Will send watchdog notifications.",
-			slog.Duration("frequency", freqD),
-		)
-		watchdog = time.Tick(freqD)
+	watchdog, err := getWatchdogNotifications()
+	if err != nil {
+		// Function already did logging.
+		return
 	}
 
 	err = rpio.Open()
@@ -122,4 +110,30 @@ func checkTemperature(fanPin *rpio.Pin, maxTemp, targetTemp float64) {
 		fanPin.Low()
 		sdnotify.Status("fan off")
 	}
+}
+
+func getWatchdogNotifications() (<-chan time.Time, error) {
+	// Start off nil. If we're running under systemd, with a watchdog
+	// interval set, then set up this timer. It's safe to use a nil channel
+	// in `select` below.
+	watchdogFreq, ok := os.LookupEnv("WATCHDOG_USEC")
+	if !ok {
+		slog.Info("No watchdog notifications.")
+		return nil, nil
+	}
+	freqUsec, err := strconv.Atoi(watchdogFreq)
+	if err != nil {
+		slog.Error("Invalid WATCHDOG_USEC.",
+			slog.String("value", watchdogFreq),
+			slog.String("error", err.Error()),
+		)
+		sdnotify.Errno(int(unix.EINVAL))
+		return nil, err
+	}
+	// We're supposed to notify at half the watchdog interval.
+	freq := time.Duration(freqUsec) * time.Microsecond / 2
+	slog.Info("Will send watchdog notifications.",
+		slog.Duration("frequency", freq),
+	)
+	return time.Tick(freq), nil
 }
