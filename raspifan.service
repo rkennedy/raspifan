@@ -1,0 +1,13 @@
+[Unit]
+Description = Raspberry Pi fan controller
+
+ConditionPathExists = /sys/devices/virtual/thermal/thermal_zone0/temp
+
+[Service]
+Type = notify-reload
+ExecStart = /usr/local/bin/raspifan
+
+[Install]
+WantedBy = multi-user.target
+
+# vim: set ft=systemd:
