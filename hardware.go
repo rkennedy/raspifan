@@ -7,8 +7,10 @@ import (
 	"strconv"
 )
 
+const temperaturePath = "/sys/devices/virtual/thermal/thermal_zone0/temp"
+
 func readTemp() (float64, error) {
-	temp, err := os.Open("/sys/devices/virtual/thermal/thermal_zone0/temp")
+	temp, err := os.Open(temperaturePath)
 	if err != nil {
 		slog.Error("Unable to open temperature file.",
 			slog.String("error", err.Error()),

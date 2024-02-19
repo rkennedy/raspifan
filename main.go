@@ -13,6 +13,17 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 0 && os.Args[0] == "install" {
+		err := install()
+		if err != nil {
+			slog.Error("Cannot install systemd file.",
+				slog.String("error", err.Error()),
+			)
+			os.Exit(1)
+		}
+		return
+	}
+
 	config, err := loadConfig()
 	if err != nil {
 		slog.Error("Cannot load configuration.",

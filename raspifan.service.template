@@ -1,11 +1,13 @@
+# This file was generated automatically by raspifan.
+
 [Unit]
 Description = Raspberry Pi fan controller
 
-ConditionPathExists = /sys/devices/virtual/thermal/thermal_zone0/temp
+ConditionPathExists = {{ .TempPath }}
 
 [Service]
 Type = notify-reload
-ExecStart = /usr/local/bin/raspifan
+ExecStart = {{ .SelfPath }}
 
 [Install]
 WantedBy = multi-user.target
