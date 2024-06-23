@@ -20,7 +20,7 @@ func install() error {
 		return err
 	}
 
-	destination, err := os.Open("/usr/local/lib/systemd/system/raspifan.service")
+	destination, err := os.OpenFile("/usr/local/lib/systemd/system/raspifan.service", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
