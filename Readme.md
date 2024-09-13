@@ -1,3 +1,12 @@
+# Raspifan
+
+I wrote this to control the fan on my Raspberry Pi 4. There are other similar
+tools, but some didn't seem to work, or they required installing runtimes for
+languages I didn't want to maintain on my server.
+
+Writing my own provided me a chance to learn about writing a Systemd service in
+Go.
+
 # Install
 ```bash
 sudo ./install.bash
